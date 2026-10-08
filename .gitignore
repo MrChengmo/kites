@@ -1,0 +1,48 @@
+# Dependencies and generated bundles
+node_modules/
+dist/
+release/
+coverage/
+*.tsbuildinfo
+/bin/*
+
+# Local runtime state, credentials, attachments and research captures
+/data/
+/.agentway-uploads/
+/.kites-uploads/
+/docs/prototype/
+/docs/survey/
+.env
+.env.*
+!.env.example
+*.log
+*.db
+*.db-*
+*.sqlite*
+*.cred
+*.pem
+*.key
+*.p12
+*.pfx
+
+# OS/editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Native generated assets, caches and local signing settings
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor*.json
+android/capacitor-cordova-android-plugins/
+ios/App/Pods/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/App/App.xcworkspace/xcuserdata/
+ios/**/xcuserdata/
+ios/**/DerivedData/
+ios/capacitor-cordova-ios-plugins/
+*.keystore
+*.jks

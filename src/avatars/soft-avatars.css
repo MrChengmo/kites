@@ -1,0 +1,246 @@
+/* One material and facial language across the original Kites characters. */
+.soft-body {
+  transform-origin: 50px 78px;
+  animation: soft-breathe 4.8s ease-in-out infinite;
+}
+.soft-shadow {
+  transform-origin: 50px 89px;
+  animation: soft-shadow 4.8s ease-in-out infinite;
+}
+.soft-eyes {
+  transform-origin: 50px 49px;
+  animation: soft-blink 5.7s infinite;
+}
+.soft-pupils {
+  animation: soft-look 8s ease-in-out infinite;
+}
+.soft-hand.right {
+  transform-origin: 76px 64px;
+  animation: soft-wave 6.4s ease-in-out infinite;
+}
+.soft-ear.left {
+  transform-origin: 35px 39px;
+  animation: soft-ear 7.1s ease-in-out infinite;
+}
+.soft-ear.right {
+  transform-origin: 65px 39px;
+  animation: soft-ear 6.7s ease-in-out infinite reverse;
+}
+.soft-antenna {
+  transform-origin: 50px 25px;
+  animation: soft-ear 4.7s ease-in-out infinite;
+}
+.character-cat .soft-body {
+  animation-delay: -0.7s;
+}
+.character-bunny .soft-body {
+  animation-delay: -1.6s;
+}
+.character-cloud .soft-body {
+  animation-delay: -2.3s;
+}
+.character-bloom .soft-body {
+  animation-delay: -3.1s;
+}
+.character-bear .soft-eyes {
+  animation-delay: -2.1s;
+}
+.character-ghost .soft-eyes {
+  animation-delay: -3.8s;
+}
+.soft-avatar.motion-wiggle .soft-body {
+  animation-name: soft-sway;
+}
+.soft-avatar.motion-blink .soft-body {
+  animation-name: soft-settle;
+}
+.soft-avatar[data-avatar-state='working'] .soft-body {
+  animation: soft-work 1.5s ease-in-out infinite;
+}
+.soft-avatar[data-avatar-state='working'] .soft-hand.right {
+  animation-duration: 1.8s;
+}
+.soft-avatar[data-avatar-state='thinking'] .soft-body {
+  animation: soft-think 4s ease-in-out infinite;
+}
+.soft-avatar[data-avatar-state='thinking'] .soft-pupils {
+  animation-name: soft-look-up;
+}
+.soft-avatar[data-avatar-state='finished'] .soft-body {
+  animation: soft-cheer 2.2s ease-in-out infinite;
+}
+.soft-avatar[data-avatar-state='finished'] .soft-hand.right {
+  animation-duration: 2s;
+}
+.soft-avatar[data-avatar-state='blocked'] .soft-body,
+.soft-avatar[data-avatar-state='failed'] .soft-body {
+  animation: soft-think 6s ease-in-out infinite;
+}
+.soft-avatar.motion-none *,
+.kite-avatar.motion-none * {
+  animation: none !important;
+}
+@keyframes soft-breathe {
+  0%,
+  100% {
+    transform: translateY(1px) scale(1.015, 0.985);
+  }
+  50% {
+    transform: translateY(-3px) scale(0.99, 1.01);
+  }
+}
+@keyframes soft-settle {
+  0%,
+  100% {
+    transform: scale(1.01, 0.99);
+  }
+  50% {
+    transform: scale(0.99, 1.01);
+  }
+}
+@keyframes soft-sway {
+  0%,
+  60%,
+  100% {
+    transform: rotate(-2deg) translateY(0);
+  }
+  72% {
+    transform: rotate(6deg) translateY(-3px);
+  }
+  86% {
+    transform: rotate(-5deg) translateY(-1px);
+  }
+}
+@keyframes soft-blink {
+  0%,
+  39%,
+  43%,
+  76%,
+  80%,
+  100% {
+    transform: scaleY(1);
+  }
+  41%,
+  78% {
+    transform: scaleY(0.08);
+  }
+}
+@keyframes soft-look {
+  0%,
+  35%,
+  100% {
+    transform: translate(0, 0);
+  }
+  42%,
+  55% {
+    transform: translate(1.6px, -0.8px);
+  }
+  65%,
+  78% {
+    transform: translate(-1px, 0);
+  }
+}
+@keyframes soft-look-up {
+  0%,
+  100% {
+    transform: translate(1px, -2px);
+  }
+  50% {
+    transform: translate(-1px, -1px);
+  }
+}
+@keyframes soft-wave {
+  0%,
+  62%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  70%,
+  86% {
+    transform: rotate(-42deg) translateY(-3px);
+  }
+  78%,
+  94% {
+    transform: rotate(-15deg) translateY(-2px);
+  }
+}
+@keyframes soft-ear {
+  0%,
+  65%,
+  100% {
+    transform: rotate(0);
+  }
+  72% {
+    transform: rotate(-12deg);
+  }
+  80% {
+    transform: rotate(5deg);
+  }
+  88% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes soft-shadow {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.13;
+  }
+  50% {
+    transform: scaleX(0.85);
+    opacity: 0.08;
+  }
+}
+@keyframes soft-work {
+  0%,
+  100% {
+    transform: rotate(-3deg) translateY(0);
+  }
+  50% {
+    transform: rotate(3deg) translateY(-3px);
+  }
+}
+@keyframes soft-think {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-2px);
+  }
+}
+@keyframes soft-cheer {
+  0%,
+  65%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  15% {
+    transform: translateY(1px) scale(1.06, 0.94);
+  }
+  35% {
+    transform: translateY(-7px) rotate(-4deg) scale(0.98, 1.02);
+  }
+  50% {
+    transform: translateY(0) scale(1.04, 0.96);
+  }
+}
+.icon-presets > button > .soft-avatar {
+  width: min(64px, 100%);
+  height: auto;
+  aspect-ratio: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .soft-avatar *,
+  .kite-avatar * {
+    animation: none !important;
+  }
+}
+
+.soft-avatar .soft-eyes,
+.kite-avatar .soft-eyes,
+.soft-avatar .soft-hand,
+.soft-avatar .soft-pupils,
+.soft-avatar .soft-ear {
+  animation-delay: var(--avatar-delay, 0s);
+}

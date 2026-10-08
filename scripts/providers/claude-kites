@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { spawn } from 'node:child_process';
+
+let provider;
+try {
+  provider = JSON.parse(readFileSync(`${homedir()}/.paseo/config.json`, 'utf8')).agents.providers.ducc;
+  if (!provider.env.ANTHROPIC_BASE_URL || !provider.models.some(model => model.id === 'Grok-4.7')) throw new Error();
+} catch {
+  console.error('Kites requires the Paseo OneAPI provider with Grok-4.7 configured.');
+  process.exit(1);
+}
+const env = { ...process.env, ...provider.env, ANTHROPIC_MODEL: 'Grok-4.7',
+  ANTHROPIC_DEFAULT_OPUS_MODEL: 'Grok-4.7', ANTHROPIC_DEFAULT_SONNET_MODEL: 'Grok-4.7',
+  ANTHROPIC_DEFAULT_HAIKU_MODEL: 'Grok-4.7', ANTHROPIC_SMALL_FAST_MODEL: 'Grok-4.7' };
+delete env.CLAUDE_CODE_OAUTH_TOKEN;
+const child = spawn(process.env.KITES_CLAUDE_BIN || 'claude', process.argv.slice(2), { env, stdio: 'inherit' });
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
+child.on('error', () => { console.error('Kites could not launch Claude Code.'); process.exit(1); });
+child.on('exit', code => process.exit(code ?? 1));

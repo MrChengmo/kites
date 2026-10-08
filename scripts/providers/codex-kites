@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "${KITES_CODEX_BIN:-codex}" "$@" -c 'model="gpt-6-sol"' -c 'model_reasoning_effort="low"'

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kites</string>
+    <string name="title_activity_main">Kites</string>
+    <string name="package_name">app.kites.mobile</string>
+    <string name="custom_url_scheme">app.kites.mobile</string>
+</resources>

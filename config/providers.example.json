@@ -1,0 +1,7 @@
+{
+  "AGENTWAY_CODEX_BIN": "/absolute/path/to/codex",
+  "AGENTWAY_CLAUDE_BRIDGE": "/absolute/path/to/claude-bridge",
+  "AGENTWAY_CLAUDE_BIN": "/absolute/path/to/claude",
+  "AGENTWAY_GROK_BIN": "/absolute/path/to/grok",
+  "AGENTWAY_GOOSE_BIN": "/absolute/path/to/goose"
+}

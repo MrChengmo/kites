@@ -1,0 +1,103 @@
+{
+  "name": "kites",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kites \u2014 your bots, working together. Powered by Agentway.",
+  "main": "desktop/main.mjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "start": "node server/index.mjs",
+    "test": "vitest run && node --test tests/*.test.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src server desktop scripts tests shared && prettier --check src server desktop scripts tests shared *.json *.ts *.html",
+    "lint:css": "stylelint 'src/**/*.css'",
+    "format": "prettier --write src server desktop scripts tests shared *.json *.ts *.html",
+    "desktop": "npm run build && electron .",
+    "desktop:pack": "npm run build && electron-builder --dir",
+    "mobile:sync": "npm run build && cap sync",
+    "mobile:ios": "cap open ios",
+    "mobile:android": "cap open android",
+    "runtime:build": "node scripts/build-runtime.mjs",
+    "icons": "node scripts/icons.mjs",
+    "runtime:start": "node scripts/start-runtime.mjs",
+    "providers:build": "node scripts/build-providers.mjs"
+  },
+  "dependencies": {
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/device": "8.0.3",
+    "@capacitor/filesystem": "8.1.4",
+    "@capacitor/keyboard": "8.0.6",
+    "@capacitor/share": "8.0.3",
+    "@fontsource-variable/noto-sans-sc": "5.3.0",
+    "lucide-react": "0.544.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/cli": "8.5.2",
+    "@capacitor/ios": "8.5.2",
+    "@testing-library/react": "16.3.0",
+    "@types/react": "18.3.24",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "5.0.4",
+    "electron": "43.1.0",
+    "electron-builder": "26.0.12",
+    "jsdom": "27.0.0",
+    "oxlint": "1.76.0",
+    "prettier": "3.9.6",
+    "sharp": "0.34.3",
+    "stylelint": "16.26.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "4.0.18"
+  },
+  "build": {
+    "appId": "app.kites.desktop",
+    "productName": "Kites",
+    "asar": true,
+    "npmRebuild": false,
+    "files": [
+      "dist/**/*",
+      "desktop/**/*",
+      "server/**/*",
+      "package.json",
+      "shared/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": "dmg",
+      "icon": "public/icon.png"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Office",
+      "icon": "public/icon.png"
+    },
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    }
+  },
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wolvever/kites.git"
+  }
+}

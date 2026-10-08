@@ -1,0 +1,58 @@
+export const kites = [
+  {
+    id: 'kite',
+    name: 'Little kite',
+    color: '#85b79a',
+    path: 'M46 12Q50 7 54 12L77 35Q81 39 77 44L54 72Q50 77 46 72L23 44Q19 39 23 35Z',
+    split: 'M50 9V76L20 39Z',
+  },
+  {
+    id: 'bow',
+    name: 'Bow kite',
+    color: '#e39a86',
+    path: 'M47 13Q50 10 53 13L74 31Q78 35 74 41L54 70Q50 76 46 70L26 41Q22 35 26 31Z',
+    split: 'M50 11 77 35 50 74Z',
+  },
+  {
+    id: 'paper',
+    name: 'Paper kite',
+    color: '#e7b556',
+    path: 'M46 12Q50 9 54 12L79 35Q82 39 77 44L54 70Q50 74 46 70L22 44Q18 39 22 35Z',
+    split: 'M50 10 80 39 50 48 20 39Z',
+  },
+  {
+    id: 'wing',
+    name: 'Wing kite',
+    color: '#82b8d1',
+    path: 'M46 20Q50 15 54 20L84 40Q90 46 81 49L56 57 52 73Q50 78 48 73L44 57 19 49Q10 46 16 40Z',
+    split: 'M50 17V76L44 57 12 46Z',
+  },
+  {
+    id: 'lantern',
+    name: 'Lantern kite',
+    color: '#b4a0d3',
+    path: 'M48 15Q50 12 52 15C66 20 78 31 77 42Q75 57 55 72Q50 76 45 72C25 57 23 45 24 37Q27 22 48 15Z',
+    split: 'M50 14C32 32 32 55 50 75L45 72C25 57 23 45 24 37Q27 22 50 14Z',
+  },
+  {
+    id: 'ribbon',
+    name: 'Ribbon kite',
+    color: '#d998b0',
+    path: 'M45 14Q50 9 55 14L73 32Q81 39 75 47L55 68Q50 75 45 68L25 47Q19 39 27 32Z',
+    split: 'M50 10V73L23 40Z',
+  },
+  {
+    id: 'leaf',
+    name: 'Leaf kite',
+    color: '#9abe79',
+    path: 'M48 13Q52 10 55 14C78 35 80 48 60 65Q50 75 40 67C18 50 26 30 48 13Z',
+    split: 'M52 12 40 68C18 50 26 30 52 12Z',
+  },
+  {
+    id: 'star-kite',
+    name: 'Star kite',
+    color: '#d9bd61',
+    path: 'M46 13Q50 5 54 13L60 28 77 34Q86 38 78 44L60 51 54 68Q50 77 46 68L40 51 23 44Q14 38 23 34L40 28Z',
+    split: 'M50 8V75L40 51 18 39 40 28Z',
+  },
+] as const;

@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { spawn } from 'node:child_process';
+const provider = JSON.parse(readFileSync(`${homedir()}/.paseo/config.json`, 'utf8')).agents.providers.ducc.env;
+const token = provider.DUCC_AUTH_TOKEN || provider.ANTHROPIC_AUTH_TOKEN;
+if (!token || !provider.ANTHROPIC_BASE_URL) {
+  console.error('Kites requires Paseo OneAPI credentials.');
+  process.exit(1);
+}
+const binary = process.env.KITES_GROK_BIN || 'grok';
+const env = { ...process.env, XAI_API_KEY: token,
+  GROK_MODELS_BASE_URL: provider.ANTHROPIC_BASE_URL.replace(/\/$/, '') + '/v1',
+  GROK_DEFAULT_MODEL: 'kites-oneapi' };
+
+const child = spawn(binary, process.argv.slice(2), { env, stdio: 'inherit' });
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
+child.on('error', () => { console.error('Kites could not launch the provider.'); process.exit(1); });
+child.on('exit', code => process.exit(code ?? 1));

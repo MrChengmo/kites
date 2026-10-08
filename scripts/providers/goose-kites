@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { spawn } from 'node:child_process';
+const provider = JSON.parse(readFileSync(`${homedir()}/.paseo/config.json`, 'utf8')).agents.providers.ducc.env;
+const token = provider.DUCC_AUTH_TOKEN || provider.ANTHROPIC_AUTH_TOKEN;
+if (!token || !provider.ANTHROPIC_BASE_URL) {
+  console.error('Kites requires Paseo OneAPI credentials.');
+  process.exit(1);
+}
+const binary = process.env.KITES_GOOSE_BIN || 'goose';
+const env = { ...process.env, DUCC_AUTH_TOKEN: token,
+  GOOSE_PROVIDER: 'custom_kites_oneapi', GOOSE_MODEL: 'Grok-4.7' };
+
+const child = spawn(binary, process.argv.slice(2), { env, stdio: 'inherit' });
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
+child.on('error', () => { console.error('Kites could not launch the provider.'); process.exit(1); });
+child.on('exit', code => process.exit(code ?? 1));
