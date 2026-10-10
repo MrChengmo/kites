@@ -91,3 +91,23 @@ test('permission downgrade blocks prompts until native sandbox is reapplied', as
     status: 409,
   });
 });
+test('new chat members get the agent env and default model of their Kind', async () => {
+  const prepare = workspaceRequests(async () => Response.json({ Spec: { Kind: 'codex' } }), {
+    codex: { BEDROCK_API_KEY: 'key', AGENTWAY_MODEL: 'gpt' },
+  });
+  const made = await prepare('/api/v1/sessions', 'POST', {
+    members: [
+      { agent: { Kind: 'codex' } },
+      { agent: { Kind: 'codex', Model: 'mine', Env: { BEDROCK_API_KEY: 'own' } } },
+      { agent: { Kind: 'claudecode' } },
+    ],
+  });
+  assert.deepEqual(
+    made.members.map(({ agent }) => agent),
+    [
+      { Kind: 'codex', Env: { BEDROCK_API_KEY: 'key' }, Model: 'gpt' },
+      { Kind: 'codex', Model: 'mine', Env: { BEDROCK_API_KEY: 'own' } },
+      { Kind: 'claudecode' },
+    ],
+  );
+});
