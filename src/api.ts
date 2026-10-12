@@ -21,7 +21,8 @@ export class APIError extends Error {
     super(message);
   }
 }
-export const runtimeChoice = localStorage.getItem('kites.runtime') === 'alpha' ? 'alpha' : 'local';
+export const runtimeChoice = () =>
+  localStorage.getItem('kites.runtime') === 'alpha' ? 'alpha' : 'local';
 export function chooseRuntime(value: string) {
   localStorage.setItem('kites.runtime', value === 'alpha' ? 'alpha' : 'local');
   location.hash = '#settings';
@@ -60,7 +61,7 @@ export function configureConnection(value: { endpoint: string; token: string }) 
 }
 export async function request(path: string, init: RequestInit = {}) {
   if (isNative && !endpoint) throw new Error('Connect to your Kites server to get started.');
-  const response = await fetch(endpoint + (runtimeChoice === 'alpha' ? '/alpha' : '') + path, {
+  const response = await fetch(endpoint + (runtimeChoice() === 'alpha' ? '/alpha' : '') + path, {
     ...init,
     headers: {
       'Content-Type': 'application/json',
@@ -165,28 +166,38 @@ export async function createSession(
         workspace: profiles[0]?.Spec.Metadata?.['kites.workspace'] || '',
       };
   profiles.forEach((profile) => workspaceMode(profile.Spec, resolved));
+  // On alpha a sandbox stops after one hour and its host goes offline. A chat
+  // with no live Environment gets a new one, so the user never creates one.
+  let created: { ID: string; Spec: { Host?: string } } | undefined;
+  if (runtimeChoice() === 'alpha' && !resolved.environment) {
+    const owner = profiles[0]?.Key?.split('/')[1] || 'kites';
+    created = await api('/api/v1/environments', {
+      method: 'POST',
+      body: JSON.stringify({
+        Key: `kites/${owner}-${crypto.randomUUID().slice(0, 8)}`,
+        Kind: 'miaoda',
+      }),
+    });
+    resolved.environment = created!.ID;
+  }
   const session = await api<Session>('/api/v1/sessions', {
     method: 'POST',
     body: JSON.stringify({
       Key: `kites/chat/${crypto.randomUUID()}`,
-      Host: profiles[0]?.Spec.Host || undefined,
-      ...(place?.environment
-        ? { EnvironmentID: place.environment, workspace_id: place.workspace || undefined }
-        : profiles[0]?.Spec.EnvironmentID
-          ? {
-              EnvironmentID: profiles[0].Spec.EnvironmentID,
-              workspace_id: profiles[0].Spec.Metadata?.['kites.workspace'] || undefined,
-            }
-          : {}),
+      Host: created?.Spec.Host || profiles[0]?.Spec.Host || undefined,
+      ...(resolved.environment
+        ? { EnvironmentID: resolved.environment, workspace_id: resolved.workspace || undefined }
+        : {}),
       members: profiles.map((profile) =>
         sessionMember(
-          place?.environment
+          resolved.environment
             ? {
                 ...profile,
                 Spec: {
                   ...profile.Spec,
-                  EnvironmentID: place.environment,
+                  EnvironmentID: resolved.environment,
                   EnvironmentSpec: undefined,
+                  Host: created?.Spec.Host || profile.Spec.Host,
                 },
               }
             : profile,

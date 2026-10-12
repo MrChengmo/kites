@@ -68,8 +68,8 @@ it('keeps NEW before first unread, groups speakers and exposes overflow actions'
   expect(container.querySelectorAll('.message-author')).toHaveLength(2);
   expect(container.querySelector('.same-speaker')?.textContent).toContain('Follow-up answer');
   expect(screen.getByRole('button', { name: '2 new messages' })).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Conversation menu' }));
-  expect(screen.getByRole('button', { name: 'Conversation details' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'Chat menu' }));
+  expect(screen.getByRole('button', { name: 'Chat details' })).toBeTruthy();
   rerender(
     <Conversation
       session={session}

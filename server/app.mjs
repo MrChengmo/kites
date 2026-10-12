@@ -62,7 +62,7 @@ export function createKites(options = {}) {
         ...(options.runtimeToken ? { Authorization: `Bearer ${options.runtimeToken}` } : {}),
       },
     });
-  const prepareWorkspace = workspaceRequests(upstreamRuntime);
+  const prepareWorkspace = workspaceRequests(upstreamRuntime, options.agentEnv);
   const runtime = async (path, init = {}) => {
     if (init.body) {
       const data = await prepareWorkspace(path.split('?')[0], init.method, JSON.parse(init.body));
@@ -78,6 +78,7 @@ export function createKites(options = {}) {
         alphaURL: undefined,
         runtimeURL: options.alphaURL,
         runtimeToken: options.alphaToken,
+        agentEnv: options.alphaAgentEnv,
         database: options.alphaDatabase || resolve('data/kites-alpha.db'),
         isAlpha: true,
       })

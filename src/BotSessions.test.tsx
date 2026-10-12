@@ -45,7 +45,7 @@ it('collapses sessions, persists that choice and creates a chat with the correct
       {(s) => <p key={s.id}>{s.id}</p>}
     </BotSessions>,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Conversations with Pip' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Chats with Pip' }));
   expect(screen.queryByText('one')).toBeNull();
   expect(JSON.parse(localStorage.getItem('kites.collapsedBots')!)).toEqual(['profile']);
   fireEvent.click(screen.getByRole('button', { name: 'New chat with Pip' }));

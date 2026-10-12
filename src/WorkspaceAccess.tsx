@@ -26,28 +26,30 @@ export function workspaceDescription(session: Session, environments: Environment
   const cwd = workspace?.cwd || environment?.Spec.Roots?.[0] || '';
   const modes = session.agents.map((a) => a.spec.Sandbox);
   const readOnly = modes.length > 0 && modes.every((mode) => mode === 'read-only');
-  return { ...place, label, cwd, readOnly };
+  return { ...place, label, workspaceName: name, cwd, readOnly };
 }
 export function WorkspaceBadge({
   session,
   environments,
   onClick,
+  workspaceOnly = false,
 }: {
   session: Session;
   environments: Environment[];
   onClick?: () => void;
+  workspaceOnly?: boolean;
 }) {
   const info = workspaceDescription(session, environments);
+  if (workspaceOnly && !info.workspaceName) return null;
+  const label = workspaceOnly ? info.workspaceName : info.label;
   const content = (
     <>
       <Folder size={12} />
-      <span>{info.label}</span>
+      <span>{label}</span>
       {info.readOnly && <LockKeyhole size={11} />}
     </>
   );
-  const title = [info.label, info.cwd, info.readOnly ? t('Read only') : '']
-    .filter(Boolean)
-    .join('\n');
+  const title = [label, info.cwd, info.readOnly ? t('Read only') : ''].filter(Boolean).join('\n');
   return onClick ? (
     <button
       type="button"
@@ -204,7 +206,7 @@ export function ChatWorkspaceEditor({
       <WorkspaceBadge session={session} environments={environments} />
       <p className="muted small">
         {t(
-          'The next message runs here. Chat history stays in this conversation; files stay in their original folders.',
+          'The next message runs here. Chat history stays in this chat; files stay in their original folders.',
         )}
       </p>
       {busy ? (

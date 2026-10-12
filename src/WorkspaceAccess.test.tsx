@@ -43,6 +43,24 @@ describe('workspace access', () => {
       screen.getByText('Design · Studio').closest('span.workspace-badge')?.getAttribute('title'),
     ).toContain('/studio/design');
   });
+  it('shows only the workspace in the tree while keeping environment details elsewhere', () => {
+    const { rerender } = render(
+      <WorkspaceBadge session={session} environments={environments} workspaceOnly />,
+    );
+    expect(screen.getByText('Design')).toBeTruthy();
+    expect(screen.queryByText(/Studio/)).toBeNull();
+    rerender(<WorkspaceBadge session={session} environments={environments} />);
+    expect(screen.getByText('Design · Studio')).toBeTruthy();
+    rerender(
+      <WorkspaceBadge
+        session={{ ...session, spec: { EnvironmentID: 'env' } }}
+        environments={environments}
+        workspaceOnly
+      />,
+    );
+    expect(screen.queryByText(/Environment root/)).toBeNull();
+    expect(document.querySelector('.workspace-badge')).toBeNull();
+  });
   it('limits the picker to permitted workspaces', () => {
     render(
       <WorkspacePicker

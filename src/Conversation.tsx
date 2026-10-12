@@ -339,7 +339,7 @@ export function Conversation({
               <h2>{title}</h2>
               <p>
                 {members.length > 1
-                  ? t('{count} bots · Group conversation', { count: members.length })
+                  ? t('{count} bots · Group chat', { count: members.length })
                   : members[0]?.spec.Metadata?.['kites.role'] || memberName(members[0])}
               </p>
               <WorkspaceBadge session={session} environments={environments} onClick={onDetails} />
@@ -356,8 +356,8 @@ export function Conversation({
             </button>
             <button
               className="icon-button export-conversation"
-              aria-label={t('Export conversation')}
-              title={t('Export conversation')}
+              aria-label={t('Export chat')}
+              title={t('Export chat')}
               onClick={() => {
                 void download(`${title}.md`, transcript(events)).catch((e) =>
                   setLocalError(e.message),
@@ -368,7 +368,7 @@ export function Conversation({
             </button>
             <button
               className="icon-button"
-              aria-label={t('Conversation menu')}
+              aria-label={t('Chat menu')}
               aria-expanded={menu}
               onClick={() => setMenu(!menu)}
             >
@@ -383,7 +383,7 @@ export function Conversation({
                   onDetails();
                 }}
               >
-                {t('Conversation details')}
+                {t('Chat details')}
               </button>
               <button
                 onClick={() => {
@@ -401,7 +401,7 @@ export function Conversation({
                   );
                 }}
               >
-                {t('Export conversation')}
+                {t('Export chat')}
               </button>
             </div>
           )}
@@ -418,14 +418,14 @@ export function Conversation({
             {loading ? (
               <div className="loading-line">
                 <LoaderCircle className="spin" size={18} />
-                {t('Loading conversation')}
+                {t('Loading chat')}
               </div>
             ) : entries.length === 0 ? (
               <div className="conversation-welcome">
                 <Avatar spec={members[0]?.spec} name={memberName(members[0])} size="hero" />
                 <h1>{t('A little help goes a long way.')}</h1>
                 <p>
-                  {t('Start a conversation with {names}.', {
+                  {t('Start a chat with {names}.', {
                     names: members.map(memberName).join(locale() === 'zh-CN' ? '、' : ' and '),
                   })}
                 </p>
@@ -751,7 +751,7 @@ export function Conversation({
                   <Folder size={17} />
                   <span>
                     {t('Change workspace')}
-                    <small>{t('Files and context for this conversation')}</small>
+                    <small>{t('Files and context for this chat')}</small>
                   </span>
                 </button>
                 <button

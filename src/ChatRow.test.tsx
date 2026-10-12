@@ -20,7 +20,7 @@ function setup(archived = false) {
 it('exposes delete, archive and restore without opening a conversation', async () => {
   const actions = setup();
   fireEvent.click(screen.getByLabelText('Chat actions for Bob'));
-  fireEvent.click(screen.getByRole('menuitem', { name: 'Delete conversation' }));
+  fireEvent.click(screen.getByRole('menuitem', { name: 'Delete chat' }));
   expect(actions.onDelete).toHaveBeenCalledOnce();
   expect(actions.open).not.toHaveBeenCalled();
   fireEvent.click(screen.getByLabelText('Chat actions for Bob'));

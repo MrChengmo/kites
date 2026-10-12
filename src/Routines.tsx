@@ -314,7 +314,7 @@ export function Routines({
         </div>
       ) : (
         <Empty icon={<Clock3 />} title={t('Your results will land here.')}>
-          {t('Run a routine to see its conversation and status.')}
+          {t('Run a routine to see its chat and status.')}
         </Empty>
       )}
     </div>

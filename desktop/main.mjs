@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { randomBytes } from 'node:crypto';
+import { alphaConnection } from '../server/alpha.mjs';
 import { createKites } from '../server/app.mjs';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 let service, window, runtime;
@@ -79,10 +80,12 @@ async function start() {
     preference: language,
     systemLanguages: app.getPreferredSystemLanguages(),
   });
-  const updateMenu = () =>
+  const updateMenu = () => {
+    if (closing) return;
     Menu.setApplicationMenu(
       Menu.buildFromTemplate(menuTemplate(language, app.getPreferredSystemLanguages())),
     );
+  };
   let origin = process.env.KITES_SERVER_URL;
   if (!origin) {
     try {
@@ -111,10 +114,7 @@ async function start() {
     await ensureRuntime();
     token = randomBytes(32).toString('hex');
     service = createKites({
-      alphaURL: process.env.AGENTWAY_ALPHA_URL || 'http://127.0.0.1:8081',
-      alphaToken: process.env.AGENTWAY_ALPHA_TOKEN_FILE
-        ? readFileSync(process.env.AGENTWAY_ALPHA_TOKEN_FILE, 'utf8').trim()
-        : process.env.AGENTWAY_ALPHA_TOKEN,
+      ...alphaConnection(),
       alphaDatabase: join(app.getPath('userData'), 'kites-alpha.db'),
       database: process.env.KITES_DATABASE || join(app.getPath('userData'), 'kites.db'),
       webRoot: join(root, 'dist'),

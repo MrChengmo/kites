@@ -304,7 +304,7 @@ export function WorkPanel({
             </Markdown>
             <h4>{t('Returned summary')}</h4>
             <Markdown>
-              {worker.result || t('No result has been returned in the parent conversation.')}
+              {worker.result || t('No result has been returned in the parent chat.')}
             </Markdown>
             <h4>{t('Delegation activity')}</h4>
             {worker.calls.map((e) => (
@@ -375,7 +375,7 @@ export function WorkPanel({
             ) : (
               <p className="work-empty">
                 {t(
-                  'No file content was included in the completed tool results. You can save a bot response from the conversation.',
+                  'No file content was included in the completed tool results. You can save a bot response from the chat.',
                 )}
               </p>
             )}

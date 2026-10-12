@@ -38,6 +38,26 @@ describe('current runtime contract', () => {
       { agent: { Kind: 'codex', Metadata: { 'kites.profile': 'b' } } },
     ]);
   });
+  it('creates a sandbox on alpha when the chat has no live environment', async () => {
+    localStorage.setItem('kites.runtime', 'alpha');
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ ID: 'a', Key: 'kites/maya', Spec: { Kind: 'codex' } }))
+      .mockResolvedValueOnce(
+        Response.json({ ID: 'env-1', Spec: { Host: 'host-1', Kind: 'miaoda' } }),
+      )
+      .mockResolvedValueOnce(Response.json({ id: 'sid-1' }))
+      .mockResolvedValueOnce(Response.json({ id: 'sid-1' }));
+    vi.stubGlobal('fetch', fetcher);
+    await createSession(['a'], 'Chat');
+    const created = JSON.parse(fetcher.mock.calls[1][1].body);
+    expect(created.Kind).toBe('miaoda');
+    expect(created.Key).toMatch(/^kites\/maya-/);
+    const session = JSON.parse(fetcher.mock.calls[2][1].body);
+    expect(session).toMatchObject({ EnvironmentID: 'env-1', Host: 'host-1' });
+    expect(session.members[0].agent).toMatchObject({ EnvironmentID: 'env-1', Host: 'host-1' });
+    localStorage.removeItem('kites.runtime');
+  });
   it('keeps unsupported status available for polling fallback', async () => {
     vi.stubGlobal(
       'fetch',

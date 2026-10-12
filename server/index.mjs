@@ -1,12 +1,9 @@
-import { readFileSync } from 'node:fs';
+import { alphaConnection } from './alpha.mjs';
 import { createKites } from './app.mjs';
 const app = createKites({
   host: process.env.KITES_HOST,
   runtimeURL: process.env.AGENTWAY_URL,
-  alphaURL: process.env.AGENTWAY_ALPHA_URL || 'http://127.0.0.1:8081',
-  alphaToken: process.env.AGENTWAY_ALPHA_TOKEN_FILE
-    ? readFileSync(process.env.AGENTWAY_ALPHA_TOKEN_FILE, 'utf8').trim()
-    : process.env.AGENTWAY_ALPHA_TOKEN,
+  ...alphaConnection(),
   runtimeToken: process.env.AGENTWAY_TOKEN,
   accessToken: process.env.KITES_ACCESS_TOKEN,
   database: process.env.KITES_DATABASE,

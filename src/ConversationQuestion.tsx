@@ -13,6 +13,9 @@ export function Question({
 }) {
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const questions = entry.payload.questions || [];
+  const multiSelect = questions.some(
+    (q) => q.input?.multiple || q.input?.multiSelect || q.input?.type === 'array',
+  );
   const [submitting, setSubmitting] = useState(false);
   const recorded = questions
     .map((q) => {
@@ -38,7 +41,7 @@ export function Question({
   return (
     <section
       id={`question-${entry.id}`}
-      className="conversation-question"
+      className={`conversation-question${multiSelect ? ' multi-select-question' : ''}`}
       aria-label={t('Bot question')}
       aria-busy={submitting}
     >
@@ -54,11 +57,11 @@ export function Question({
         </details>
       )}
       <Form
-        label={t('Send response')}
+        label={t(multiSelect ? 'Submit' : 'Send response')}
         submit={async () => {
           if (!questions.length)
             throw new Error(
-              'The provider supplied no answer fields. Reply in the conversation or stop the run.',
+              'The provider supplied no answer fields. Reply in the chat or stop the run.',
             );
           for (const q of questions)
             if (

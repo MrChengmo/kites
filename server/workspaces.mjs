@@ -1,6 +1,13 @@
 import { workspaceAccess, workspaceMode, sessionPlace } from '../shared/workspaceAccess.mjs';
 const fail = (status, message) => Object.assign(new Error(message), { status });
-export function workspaceRequests(runtime) {
+// agentEnv maps an agent Kind to env vars for each new chat member. AGENTWAY_MODEL
+// is the Model when the member has none. Member values win.
+export function workspaceRequests(runtime, agentEnv = {}) {
+  function addEnv(agent) {
+    const { AGENTWAY_MODEL: model, ...vars } = agentEnv[agent.Kind] || {};
+    if (Object.keys(vars).length) agent.Env = { ...vars, ...agent.Env };
+    if (!agent.Model && model) agent.Model = model;
+  }
   async function get(path) {
     const response = await runtime(path, { signal: AbortSignal.timeout(20000) });
     if (!response.ok) throw fail(response.status, await response.text());
@@ -41,6 +48,7 @@ export function workspaceRequests(runtime) {
         const spec = await profile(member.agent);
         const sandbox = mode(spec, place);
         if (sandbox) member.agent.Sandbox = sandbox;
+        addEnv(member.agent);
       }
     }
     if (method === 'POST' && /^\/api\/v1\/agents\/[^/]+\/prompt$/.test(path)) {
