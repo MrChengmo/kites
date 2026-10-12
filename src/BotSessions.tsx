@@ -77,7 +77,7 @@ export function BotSessions({
               <button
                 aria-expanded={!closed}
                 onClick={() => toggle(group.id)}
-                aria-label={t('Conversations with {name}', { name: group.name })}
+                aria-label={t('Chats with {name}', { name: group.name })}
               >
                 <ChevronRight size={13} className={closed ? '' : 'expanded'} />
                 {group.id === 'groups' ? (

@@ -80,10 +80,12 @@ async function start() {
     preference: language,
     systemLanguages: app.getPreferredSystemLanguages(),
   });
-  const updateMenu = () =>
+  const updateMenu = () => {
+    if (closing) return;
     Menu.setApplicationMenu(
       Menu.buildFromTemplate(menuTemplate(language, app.getPreferredSystemLanguages())),
     );
+  };
   let origin = process.env.KITES_SERVER_URL;
   if (!origin) {
     try {

@@ -173,7 +173,7 @@ export function ChatRow({
             }}
           >
             <Settings size={16} />
-            {t('Conversation details')}
+            {t('Chat details')}
           </button>
           <button role="menuitem" onClick={() => void run(onPin)}>
             {pinned ? <PinOff size={16} /> : <Pin size={16} />}
@@ -192,7 +192,7 @@ export function ChatRow({
             }}
           >
             <Trash2 size={16} />
-            {t('Delete conversation')}
+            {t('Delete chat')}
           </button>
         </div>
       )}

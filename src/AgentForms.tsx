@@ -61,7 +61,7 @@ export function AgentForm({
             EnvironmentSpec: environment
               ? undefined
               : agent?.Spec.EnvironmentSpec ||
-                (runtimeChoice === 'alpha' ? { Kind: 'miaoda', Roots: [] } : undefined),
+                (runtimeChoice() === 'alpha' ? { Kind: 'miaoda', Roots: [] } : undefined),
             Host: environment
               ? environments.find((e) => e.ID === environment)?.Spec.Host
               : agent?.Spec.Host,
@@ -102,7 +102,7 @@ export function AgentForm({
         <Field
           label={t('Instructions')}
           hint={t(
-            'Used for new conversations and future routine runs. Include the tone and approach you prefer.',
+            'Used for new chats and future routine runs. Include the tone and approach you prefer.',
           )}
         >
           <textarea
@@ -199,7 +199,7 @@ export function PluginForm({
           <Cable size={25} />
         </div>
         <h2>{t('Give your bot more to work with.')}</h2>
-        <p>{t('Connect an MCP server to bring its tools into your bot’s conversations.')}</p>
+        <p>{t('Connect an MCP server to bring its tools into your bot’s chats.')}</p>
       </div>
       <Form
         label={server ? t('Save connection') : t('Connect plugin')}
@@ -320,7 +320,7 @@ export function PluginForm({
         </details>
         <p className="notice">
           {t(
-            'Connecting gives this bot access to the server’s tools. Changes apply to new conversations and future routine runs.',
+            'Connecting gives this bot access to the server’s tools. Changes apply to new chats and future routine runs.',
           )}
         </p>
       </Form>
@@ -330,7 +330,7 @@ export function PluginForm({
 export function EnvironmentForm({ onSaved }: { onSaved: () => Promise<void> }) {
   const [key, setKey] = useState('');
   const [root, setRoot] = useState('');
-  const [kind, setKind] = useState(runtimeChoice === 'alpha' ? 'miaoda' : 'local');
+  const [kind, setKind] = useState(runtimeChoice() === 'alpha' ? 'miaoda' : 'local');
   const [image, setImage] = useState('');
   return (
     <Form
@@ -358,7 +358,7 @@ export function EnvironmentForm({ onSaved }: { onSaved: () => Promise<void> }) {
       </Field>
       <Field label={t('Execution location')}>
         <select value={kind} onChange={(e) => setKind(e.target.value)}>
-          {runtimeChoice === 'local' ? (
+          {runtimeChoice() === 'local' ? (
             <option value="local">{t('This host')}</option>
           ) : (
             <>

@@ -209,7 +209,7 @@ export default function App() {
     product.chats.find((c) => c.id === s.id)?.title ||
     (s.key?.startsWith('kites/') ? undefined : s.key) ||
     (s.agents || []).map(memberName).join(' & ') ||
-    t('Conversation');
+    t('Chat');
   const selected = sessions.find((s) => s.id === route.id);
   const status = (s: Session) => {
     const states = (s.agents || []).map((a) => a.status);
@@ -268,8 +268,8 @@ export default function App() {
   }
   function deleteChat(s: Session) {
     confirm(
-      'Delete conversation?',
-      'This permanently deletes this conversation and its runtime history.',
+      'Delete chat?',
+      'This permanently deletes this chat and its runtime history.',
       async () => {
         await api(`/api/v1/sessions/${encode(s.id)}`, { method: 'DELETE' });
         await api(`/api/kites/chats/${encode(s.id)}`, { method: 'DELETE' });
@@ -321,8 +321,8 @@ export default function App() {
             ))}
           </nav>
           <div className="sidebar-section">
-            <span>{t('Your conversations')}</span>
-            <button aria-label={t('New conversation')} onClick={() => setDialog({ kind: 'chat' })}>
+            <span>{t('Your chats')}</span>
+            <button aria-label={t('New chat')} onClick={() => setDialog({ kind: 'chat' })}>
               <Plus size={16} />
             </button>
           </div>
@@ -347,7 +347,7 @@ export default function App() {
                   >
                     <span className="sidebar-chat-title">
                       {title(s)}
-                      <WorkspaceBadge session={s} environments={environments} />
+                      <WorkspaceBadge session={s} environments={environments} workspaceOnly />
                     </span>
                     {reading[s.id]?.unread > 0 && (
                       <span className="unread-dot" aria-label={t('Unread messages')} />
@@ -357,7 +357,7 @@ export default function App() {
                 </ChatRow>
               )}
             </BotSessions>
-            {!sessions.length && <p>{t('Your conversations will feel at home here.')}</p>}
+            {!sessions.length && <p>{t('Your chats will feel at home here.')}</p>}
           </div>
           <div className="sidebar-bottom">
             <button
@@ -492,9 +492,9 @@ export default function App() {
               {(sessions.length > 0 || agents.length > 0) && (
                 <>
                   <div className="section-heading">
-                    <div className="chat-list-tabs" aria-label={t('Conversations')}>
+                    <div className="chat-list-tabs" aria-label={t('Chats')}>
                       <button aria-pressed={!showArchived} onClick={() => setShowArchived(false)}>
-                        {t('Conversations')}
+                        {t('Chats')}
                       </button>
                       <button aria-pressed={showArchived} onClick={() => setShowArchived(true)}>
                         {t('Archived')}
@@ -562,10 +562,10 @@ export default function App() {
                       <MessageCircle size={22} />
                       <p>
                         {search
-                          ? t('No conversations match your search.')
+                          ? t('No chats match your search.')
                           : showArchived
                             ? t('No archived chats.')
-                            : t('Your next good idea starts with a conversation.')}
+                            : t('Your next good idea starts with a chat.')}
                       </p>
                     </div>
                   )}
@@ -702,7 +702,7 @@ export default function App() {
                 </div>
               ) : (
                 <Empty icon={<Briefcase />} title={t('Nothing waiting on you.')}>
-                  {t('Your bots’ conversations and active work will appear here.')}
+                  {t('Your bots’ chats and active work will appear here.')}
                 </Empty>
               )}
             </div>
@@ -823,7 +823,7 @@ export default function App() {
                 </div>
               ) : (
                 <Empty icon={<BookOpen />} title={t('Keep the good stuff.')}>
-                  {t('Save a response from any conversation. It’ll be here when you need it.')}
+                  {t('Save a response from any chat. It’ll be here when you need it.')}
                 </Empty>
               )}
             </div>
@@ -962,7 +962,7 @@ export default function App() {
                       'Each connection keeps its own bots, chats, routines, and environments.',
                     )}
                   >
-                    <select value={runtimeChoice} onChange={(e) => chooseRuntime(e.target.value)}>
+                    <select value={runtimeChoice()} onChange={(e) => chooseRuntime(e.target.value)}>
                       <option value="local">{t('Local runtime')}</option>
                       <option value="alpha">{t('Alpha · cloud environments')}</option>
                     </select>
@@ -1064,7 +1064,7 @@ export default function App() {
                   ? t('Bot profile')
                   : t('Create bot')
                 : dialog.kind === 'chat'
-                  ? t('New conversation')
+                  ? t('New chat')
                   : dialog.kind === 'routine'
                     ? dialog.routine
                       ? t('Routine details')
@@ -1074,7 +1074,7 @@ export default function App() {
                       : dialog.kind === 'file'
                         ? dialog.file.name
                         : dialog.kind === 'details'
-                          ? t('Conversation details')
+                          ? t('Chat details')
                           : dialog.kind === 'environment'
                             ? t('New environment')
                             : dialog.kind === 'search'
@@ -1094,7 +1094,7 @@ export default function App() {
                       const agent = dialog.agent!;
                       confirm(
                         t('Delete {name}?', { name: agentName(agent) }),
-                        'This removes the bot from Agentway. Conversations are kept, but routines using this bot will fail.',
+                        'This removes the bot from Agentway. Chats are kept, but routines using this bot will fail.',
                         async () => {
                           await api(`/api/v1/agents/${encode(agent.ID)}`, { method: 'DELETE' });
                         },
@@ -1125,7 +1125,7 @@ export default function App() {
                       const id = dialog.routine!.id;
                       confirm(
                         'Delete routine?',
-                        'This stops future scheduled runs. Its conversations and run history are kept.',
+                        'This stops future scheduled runs. Its chats and run history are kept.',
                         async () => {
                           await api(`/api/kites/routines/${encode(id)}`, { method: 'DELETE' });
                         },
@@ -1155,7 +1155,7 @@ export default function App() {
                       const { agent, index } = dialog;
                       confirm(
                         'Remove plugin?',
-                        'This removes the server from this bot. Existing conversations keep their current configuration.',
+                        'This removes the server from this bot. Existing chats keep their current configuration.',
                         async () => {
                           const current = await api<AgentRecord>(
                             `/api/v1/agents/${encode(agent!.ID)}`,
@@ -1195,7 +1195,7 @@ export default function App() {
                         setDialog(undefined);
                       }}
                     >
-                      {t('Open conversation')}
+                      {t('Open chat')}
                       <ArrowUpRight size={16} />
                     </button>
                   )}
@@ -1206,7 +1206,7 @@ export default function App() {
                       const id = dialog.file.id;
                       confirm(
                         'Delete saved file?',
-                        'This removes the saved copy. The original conversation is kept.',
+                        'This removes the saved copy. The original chat is kept.',
                         async () => {
                           await api(`/api/kites/files/${encode(id)}`, { method: 'DELETE' });
                         },
@@ -1301,7 +1301,7 @@ function NewChat({
   const [name, setName] = useState('');
   return agents.length ? (
     <Form
-      label={t('Start conversation')}
+      label={t('Start chat')}
       submit={async () => {
         if (!chosen.length) throw new Error('Choose at least one bot.');
         if (group && chosen.length < 2)
@@ -1333,11 +1333,7 @@ function NewChat({
         </button>
       </div>
       <p className="muted form-intro">
-        {t(
-          group
-            ? 'Choose two or more bots to work together.'
-            : 'Choose a bot to start a conversation.',
-        )}
+        {t(group ? 'Choose two or more bots to work together.' : 'Choose a bot to start a chat.')}
       </p>
       <div className="choose-agents">
         {agents.map((a) => (
@@ -1373,12 +1369,12 @@ function NewChat({
           setWorkspace(ws);
         }}
       />
-      <Field label={t('Conversation name (optional)')}>
+      <Field label={t('Chat name (optional)')}>
         <input
           value={name}
           maxLength={200}
           onChange={(e) => setName(e.target.value)}
-          placeholder={chosen.length > 1 ? t('e.g. A fresh idea') : t('A new conversation')}
+          placeholder={chosen.length > 1 ? t('e.g. A fresh idea') : t('A new chat')}
         />
       </Field>
     </Form>
@@ -1487,7 +1483,7 @@ function ConversationDetails({
         </details>
         <label className="check-row">
           <input type="checkbox" checked={pin} onChange={(e) => setPin(e.target.checked)} />
-          {t('Pin conversation')}
+          {t('Pin chat')}
         </label>
       </Form>
       <h3 className="subheading">{t('Workspace')}</h3>
@@ -1512,14 +1508,14 @@ function ConversationDetails({
         </div>
       ))}
       <p className="notice">
-        {t('Create a new group conversation to choose a different set of existing bots.')}
+        {t('Create a new group chat to choose a different set of existing bots.')}
       </p>
       <Form submit={onArchive} label={t(archived ? 'Restore chat' : 'Archive chat')}>
         <p className="notice">{t('Archived chats keep their history and can be restored.')}</p>
       </Form>
       <button className="danger-link" onClick={onDelete}>
         <Trash2 size={16} />
-        {t('Delete conversation')}
+        {t('Delete chat')}
       </button>
     </>
   );
@@ -1541,7 +1537,7 @@ function GlobalSearch({
   const matches = (s: string) => s.toLowerCase().includes(q.toLowerCase());
   return (
     <>
-      <SearchInput value={q} onChange={setQ} placeholder={t('Find bots and conversations')} />
+      <SearchInput value={q} onChange={setQ} placeholder={t('Find bots and chats')} />
       <h3 className="subheading">{t('Bots')}</h3>
       {agents
         .filter((a) => matches(agentName(a)))
@@ -1551,7 +1547,7 @@ function GlobalSearch({
             <span>{agentName(a)}</span>
           </button>
         ))}
-      <h3 className="subheading">{t('Conversations')}</h3>
+      <h3 className="subheading">{t('Chats')}</h3>
       {sessions
         .filter((s) => matches(title(s)))
         .map((s) => (

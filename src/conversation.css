@@ -1224,3 +1224,11 @@
     min-height: 44px;
   }
 }
+
+.multi-select-question .form-actions .primary {
+  width: 100%;
+  min-height: 44px;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 14px;
+}

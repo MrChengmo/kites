@@ -64,25 +64,34 @@ it('keeps a failed reply editable and shows the recorded label after resolution'
   expect(screen.getByText('Product capabilities')).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Send response' })).toBeNull();
 });
-it('supports multi-select options and sends their IDs together', async () => {
-  const reply = vi.fn().mockResolvedValue(undefined);
-  const entry = {
-    ...question,
-    payload: {
-      ...question.payload,
-      questions: question.payload.questions!.map((q) => ({ ...q, input: { multiple: true } })),
-    },
-  };
-  render(<Question entry={entry} reply={reply} />);
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Everyday life' }));
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Product capabilities' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Send response' }));
-  await waitFor(() =>
-    expect(reply).toHaveBeenCalledWith(
-      expect.objectContaining({ answers: { direction: { value: ['daily', 'product'] } } }),
-    ),
-  );
-});
+it.each([{ multiple: true }, { multiSelect: true }, { type: 'array' }])(
+  'supports multi-select options (%j) and submits only when requested',
+  async (input) => {
+    const reply = vi.fn().mockResolvedValue(undefined);
+    const entry = {
+      ...question,
+      payload: {
+        ...question.payload,
+        questions: question.payload.questions!.map((q) => ({ ...q, input })),
+      },
+    };
+    render(<Question entry={entry} reply={reply} />);
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Everyday life' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Product capabilities' }));
+    expect(reply).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Everyday life' }));
+    expect(
+      (screen.getByRole('checkbox', { name: 'Everyday life' }) as HTMLInputElement).checked,
+    ).toBe(false);
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Everyday life' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+    await waitFor(() =>
+      expect(reply).toHaveBeenCalledWith(
+        expect.objectContaining({ answers: { direction: { value: ['product', 'daily'] } } }),
+      ),
+    );
+  },
+);
 it('replaces a selected choice with a custom answer when permitted', async () => {
   const reply = vi.fn().mockResolvedValue(undefined);
   const entry = {
