@@ -48,6 +48,9 @@ export function AgentForm({
               },
               { environment, workspace },
             );
+          // No Environment means "Bot default". On alpha the control pod runs no
+          // agent provider, so a bare bot fails with "agent provider not
+          // registered". A spec lets alpha create the sandbox and place the bot.
           const spec = {
             ...agent?.Spec,
             Kind: kind,
@@ -55,7 +58,10 @@ export function AgentForm({
             Instructions: instructions,
             SystemPrompt: context,
             EnvironmentID: environment,
-            EnvironmentSpec: environment ? undefined : agent?.Spec.EnvironmentSpec,
+            EnvironmentSpec: environment
+              ? undefined
+              : agent?.Spec.EnvironmentSpec ||
+                (runtimeChoice === 'alpha' ? { Kind: 'miaoda', Roots: [] } : undefined),
             Host: environment
               ? environments.find((e) => e.ID === environment)?.Spec.Host
               : agent?.Spec.Host,
