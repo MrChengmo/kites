@@ -76,6 +76,19 @@ describe('workspace access', () => {
       (screen.getByRole('option', { name: 'Environment root' }) as HTMLOptionElement).disabled,
     ).toBe(true);
   });
+  it('keeps a recycled environment visible instead of showing another choice', () => {
+    render(
+      <WorkspacePicker
+        environments={environments}
+        environment="env-gone"
+        workspace=""
+        onChange={() => {}}
+      />,
+    );
+    expect((screen.getAllByRole('combobox')[0] as HTMLSelectElement).value).toBe('env-gone');
+    expect(screen.getByRole('option', { name: 'No longer available · env-gone' })).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toContain('no longer available');
+  });
   it('denies unlisted workspaces, unsupported providers, and plugins', () => {
     expect(workspaceMode(restricted, { environment: 'env', workspace: 'design' })).toBe(
       'read-only',

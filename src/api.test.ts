@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { api, createSession, readStream, updateAgent } from './api';
+import { api, createSession, errorText, readStream, updateAgent } from './api';
 afterEach(() => vi.unstubAllGlobals());
 describe('current runtime contract', () => {
   it('preserves Go AgentRecord casing and revision on edits', async () => {
@@ -67,6 +67,24 @@ describe('current runtime contract', () => {
       status: 501,
       message: 'No replay',
     });
+  });
+  it('names the failed request and keeps the runtime message readable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(Response.json({ error: 'host offline' }, { status: 503 })),
+    );
+    const failure = await api<never>('/api/v1/sessions/x/prompt', { method: 'POST' }).catch(
+      (e) => e as Error,
+    );
+    expect(failure.message).toBe('host offline');
+    expect(errorText(failure)).toBe('host offline (503 POST /api/v1/sessions/x/prompt)');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockRejectedValue(Object.assign(new Error('Failed to fetch'), { name: 'TypeError' })),
+    );
+    expect(errorText(await api('/api/v1/agents').catch((e) => e))).toBe(
+      'The request could not be sent: Failed to fetch (GET /api/v1/agents)',
+    );
   });
   it('reads split UTF-8 and a final line without newline', async () => {
     const bytes = new TextEncoder().encode(

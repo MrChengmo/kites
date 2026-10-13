@@ -29,6 +29,9 @@ export function AgentForm({
   const [environment, setEnvironment] = useState(agent?.Spec.EnvironmentID || '');
   const [access, setAccess] = useState(() => workspaceAccess(agent?.Spec));
   const [workspace, setWorkspace] = useState(agent?.Spec.Metadata?.['kites.workspace'] || '');
+  // Open the section when the bot points at an environment, so a pinned or a
+  // recycled environment is visible instead of hidden behind a summary.
+  const [placeOpen] = useState(() => !!agent?.Spec.EnvironmentID);
   return (
     <>
       <div className="profile-preview">
@@ -39,6 +42,11 @@ export function AgentForm({
       <Form
         label={agent ? t('Save changes') : t('Create bot')}
         submit={async () => {
+          const place = environment ? environments.find((e) => e.ID === environment) : undefined;
+          // Saving a gone environment produces a bot that can never start, and
+          // the failure only shows up later when a chat is created.
+          if (environment && !place)
+            throw new Error('The selected environment is no longer available. Choose another one.');
           if (access.restricted)
             workspaceMode(
               {
@@ -62,9 +70,7 @@ export function AgentForm({
               ? undefined
               : agent?.Spec.EnvironmentSpec ||
                 (runtimeChoice() === 'alpha' ? { Kind: 'miaoda', Roots: [] } : undefined),
-            Host: environment
-              ? environments.find((e) => e.ID === environment)?.Spec.Host
-              : agent?.Spec.Host,
+            Host: environment ? place?.Spec.Host : agent?.Spec.Host,
             Metadata: {
               ...agent?.Spec.Metadata,
               'kites.name': name.trim(),
@@ -137,7 +143,7 @@ export function AgentForm({
             {t('The provider must be installed and signed in on your Agentway host.')}
           </p>
         </details>
-        <details className="form-details">
+        <details className="form-details" open={placeOpen}>
           <summary>{t('Workspace & access')}</summary>
           <WorkspaceAccessEditor value={access} onChange={setAccess} environments={environments} />
           <h3 className="subheading">{t('Default workspace')}</h3>
@@ -151,6 +157,11 @@ export function AgentForm({
               setWorkspace(ws);
             }}
           />
+          <p className="muted small">
+            {t(
+              'Bot default creates a fresh sandbox for each new chat. Pick an environment to keep the same files across chats.',
+            )}
+          </p>
         </details>
         <details className="form-details">
           <summary>{t('Persistent context')}</summary>
@@ -368,7 +379,7 @@ export function EnvironmentForm({ onSaved }: { onSaved: () => Promise<void> }) {
           )}
         </select>
       </Field>
-      {['miaoda', 'e2b'].includes(kind) && (
+      {['miaoda', 'e2b'].includes(kind) ? (
         <>
           <Field
             label={t('Sandbox template')}
@@ -382,19 +393,22 @@ export function EnvironmentForm({ onSaved }: { onSaved: () => Promise<void> }) {
             )}
           </p>
         </>
+      ) : (
+        // A sandbox has no folder on the Agentway host, so the field only
+        // applies to a local environment.
+        <Field
+          label={t('Folder on the Agentway host')}
+          hint={t('Bots in this environment can work with this folder.')}
+        >
+          <input
+            required
+            value={root}
+            onChange={(e) => setRoot(e.target.value)}
+            placeholder="/absolute/path/to/workspace"
+            pattern="/.*"
+          />
+        </Field>
       )}
-      <Field
-        label={t('Folder on the Agentway host')}
-        hint={t('Bots in this environment can work with this folder.')}
-      >
-        <input
-          required={kind === 'local'}
-          value={root}
-          onChange={(e) => setRoot(e.target.value)}
-          placeholder="/absolute/path/to/workspace"
-          pattern="/.*"
-        />
-      </Field>
     </Form>
   );
 }

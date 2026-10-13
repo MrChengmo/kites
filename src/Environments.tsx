@@ -23,49 +23,63 @@ export function WorkspacePicker({
   const allowed = (env: string, ws: string) =>
     bots.every((bot) => workspaceAllowed(bot, { environment: env, workspace: ws }));
   const selected = environments.find((e) => e.ID === environment);
+  // A sandbox environment disappears once it is recycled. Without this the
+  // select silently shows the first option while the saved ID still points at
+  // the gone environment, and the next chat fails with no explanation.
+  const missing = !!environment && !selected;
   return (
-    <div className="form-grid">
-      <Field label={t('Environment')}>
-        <select value={environment} onChange={(e) => onChange(e.target.value, '')}>
-          <option value="">{t(allowDefault ? 'Bot default' : 'Choose an environment')}</option>
-          {environments
-            .filter(
-              (e) =>
-                (e.Spec.Kind !== 'remote' && (e.Key || e.Workspaces?.length)) ||
-                e.ID === environment,
-            )
-            .filter(
-              (e) =>
-                allowed(e.ID, '') ||
-                e.Workspaces?.some((w) => !w.archived && allowed(e.ID, w.id)) ||
-                e.ID === environment,
-            )
-            .map((e) => (
-              <option key={e.ID} value={e.ID}>
-                {e.Key || e.ID} · {e.Spec.Kind}
+    <>
+      <div className="form-grid">
+        <Field label={t('Environment')}>
+          <select value={environment} onChange={(e) => onChange(e.target.value, '')}>
+            <option value="">{t(allowDefault ? 'Bot default' : 'Choose an environment')}</option>
+            {missing && (
+              <option value={environment}>{`${t('No longer available')} · ${environment}`}</option>
+            )}
+            {environments
+              .filter(
+                (e) =>
+                  (e.Spec.Kind !== 'remote' && (e.Key || e.Workspaces?.length)) ||
+                  e.ID === environment,
+              )
+              .filter(
+                (e) =>
+                  allowed(e.ID, '') ||
+                  e.Workspaces?.some((w) => !w.archived && allowed(e.ID, w.id)) ||
+                  e.ID === environment,
+              )
+              .map((e) => (
+                <option key={e.ID} value={e.ID}>
+                  {e.Key || e.ID} · {e.Spec.Kind}
+                </option>
+              ))}
+          </select>
+        </Field>
+        <Field label={t('Workspace')}>
+          <select
+            disabled={!environment}
+            value={workspace}
+            onChange={(e) => onChange(environment, e.target.value)}
+          >
+            <option value="" disabled={!!environment && !allowed(environment, '')}>
+              {t('Environment root')}
+            </option>
+            {selected?.Workspaces?.filter(
+              (w) => !w.archived && (allowed(environment, w.id) || w.id === workspace),
+            ).map((w) => (
+              <option key={w.id} value={w.id} disabled={!allowed(environment, w.id)}>
+                {w.key || w.cwd || w.id}
               </option>
             ))}
-        </select>
-      </Field>
-      <Field label={t('Workspace')}>
-        <select
-          disabled={!environment}
-          value={workspace}
-          onChange={(e) => onChange(environment, e.target.value)}
-        >
-          <option value="" disabled={!!environment && !allowed(environment, '')}>
-            {t('Environment root')}
-          </option>
-          {selected?.Workspaces?.filter(
-            (w) => !w.archived && (allowed(environment, w.id) || w.id === workspace),
-          ).map((w) => (
-            <option key={w.id} value={w.id} disabled={!allowed(environment, w.id)}>
-              {w.key || w.cwd || w.id}
-            </option>
-          ))}
-        </select>
-      </Field>
-    </div>
+          </select>
+        </Field>
+      </div>
+      {missing && (
+        <p className="inline-error" role="alert">
+          {t('This environment is no longer available. Choose another one.')}
+        </p>
+      )}
+    </>
   );
 }
 export function EnvironmentWorkspaces({

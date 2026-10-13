@@ -26,6 +26,7 @@ import {
   Search,
   Settings,
   Trash2,
+  TriangleAlert,
   Users,
   Wifi,
   Cable,
@@ -33,6 +34,7 @@ import {
   Sun,
   Moon,
   Pin,
+  X,
 } from 'lucide-react';
 import {
   agentName,
@@ -41,6 +43,7 @@ import {
   connection,
   createSession,
   encode,
+  errorText,
   getProduct,
   getReading,
   isNative,
@@ -128,6 +131,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState('');
+  // Connection errors come back on every refresh, so `error` can be cleared by
+  // the next poll. A failed action is reported once and must stay on screen
+  // until the user dismisses it.
+  const [alert, setAlert] = useState('');
+  const [starting, setStarting] = useState('');
   const [dialog, setDialog] = useState<Dialog>();
   const [search, setSearch] = useState('');
   const [showArchived, setShowArchived] = useState(false);
@@ -170,7 +178,7 @@ export default function App() {
     if (p.status === 'fulfilled') setProduct(p.value);
     const failed = results.find((r) => r.status === 'rejected');
     setConnected(!failed);
-    if (failed?.status === 'rejected') setError(failed.reason.message);
+    if (failed?.status === 'rejected') setError(errorText(failed.reason));
     else setError('');
     setLoading(false);
   }, []);
@@ -247,6 +255,16 @@ export default function App() {
     setSessions((old) => (old.some((s) => s.id === session.id) ? old : [session, ...old]));
     setDialog(undefined);
     navigate('chats', session.id);
+  }
+  // Creating a chat can take minutes when a sandbox has to boot. Mark the bot
+  // that is starting so its button reports progress instead of looking inert.
+  function startChatFrom(a: AgentRecord) {
+    if (starting) return;
+    setStarting(a.ID);
+    setAlert('');
+    void startChat([a.ID], agentName(a))
+      .catch((e) => setAlert(errorText(e)))
+      .finally(() => setStarting(''));
   }
   function confirm(title: string, description: string, action: () => Promise<void>) {
     setDialog({
@@ -392,10 +410,10 @@ export default function App() {
               </button>
             </header>
           )}
-          {error && !selected && (
+          {error && (
             <div className="connection-banner" role="alert">
               <Wifi size={17} />
-              <span>{t(error)}</span>
+              <span title={error}>{t(error)}</span>
               <button onClick={() => navigate('settings')}>{t('Connection')}</button>
               <button
                 className="icon-button"
@@ -403,6 +421,19 @@ export default function App() {
                 onClick={() => void refresh()}
               >
                 <RefreshCw size={15} />
+              </button>
+            </div>
+          )}
+          {alert && (
+            <div className="connection-banner" role="alert">
+              <TriangleAlert size={17} />
+              <span title={alert}>{t(alert)}</span>
+              <button
+                className="icon-button"
+                aria-label={t('Dismiss')}
+                onClick={() => setAlert('')}
+              >
+                <X size={15} />
               </button>
             </div>
           )}
@@ -468,15 +499,14 @@ export default function App() {
                   </div>
                   <div className="agent-strip">
                     {agents.slice(0, 5).map((a) => (
-                      <button
-                        key={a.ID}
-                        onClick={() => {
-                          void startChat([a.ID], agentName(a)).catch((e) => setError(e.message));
-                        }}
-                      >
+                      <button key={a.ID} disabled={!!starting} onClick={() => startChatFrom(a)}>
                         <Avatar spec={a.Spec} name={agentName(a)} size="large" />
                         <strong>{agentName(a)}</strong>
-                        <small>{a.Spec.Metadata?.['kites.role'] || a.Spec.Kind}</small>
+                        <small>
+                          {starting === a.ID
+                            ? t('Starting…')
+                            : a.Spec.Metadata?.['kites.role'] || a.Spec.Kind}
+                        </small>
                       </button>
                     ))}
                     <button className="add-agent-tile" onClick={() => setDialog({ kind: 'agent' })}>
@@ -609,15 +639,10 @@ export default function App() {
                         </p>
                         <div className="agent-card-footer">
                           <span>{a.Spec.Kind}</span>
-                          <button
-                            onClick={() => {
-                              void startChat([a.ID], agentName(a)).catch((e) =>
-                                setError(e.message),
-                              );
-                            }}
-                          >
-                            {t('Chat')}
-                            <ArrowUpRight size={16} />
+                          <button disabled={!!starting} onClick={() => startChatFrom(a)}>
+                            {starting === a.ID ? <LoaderCircle size={16} className="spin" /> : null}
+                            {starting === a.ID ? t('Starting…') : t('Chat')}
+                            {starting === a.ID ? null : <ArrowUpRight size={16} />}
                           </button>
                         </div>
                       </article>
@@ -650,7 +675,7 @@ export default function App() {
               onEdit={(routine) => setDialog({ kind: 'routine', routine })}
               onOpen={(id) => navigate('chats', id)}
               onRefresh={refresh}
-              onError={setError}
+              onError={setAlert}
             />
           ) : route.view === 'work' ? (
             <div className="page">
@@ -1180,7 +1205,7 @@ export default function App() {
                     className="subtle-button"
                     onClick={() => {
                       void download(dialog.file.name, dialog.file.content).catch((e) =>
-                        setError(e.message),
+                        setAlert(errorText(e)),
                       );
                     }}
                   >

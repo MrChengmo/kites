@@ -17,9 +17,17 @@ export class APIError extends Error {
   constructor(
     message: string,
     public status: number,
+    // Which request failed. Kept out of `message` so comparisons and
+    // translations keep working on the text the runtime returned.
+    public detail = '',
   ) {
     super(message);
   }
+}
+// What to show a user: the runtime message plus the request that produced it.
+export function errorText(error: unknown) {
+  const failure = error as Error & { detail?: string };
+  return failure?.detail ? `${failure.message} (${failure.detail})` : failure?.message || '';
 }
 export const runtimeChoice = () =>
   localStorage.getItem('kites.runtime') === 'alpha' ? 'alpha' : 'local';
@@ -61,14 +69,26 @@ export function configureConnection(value: { endpoint: string; token: string }) 
 }
 export async function request(path: string, init: RequestInit = {}) {
   if (isNative && !endpoint) throw new Error('Connect to your Kites server to get started.');
-  const response = await fetch(endpoint + (runtimeChoice() === 'alpha' ? '/alpha' : '') + path, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init.headers,
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(endpoint + (runtimeChoice() === 'alpha' ? '/alpha' : '') + path, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...init.headers,
+      },
+    });
+  } catch (cause) {
+    const failure = cause as Error;
+    // A bare "Failed to fetch" or "signal timed out" says nothing about what
+    // the user can do, so name the request that failed and keep the reason.
+    const where = `${init.method || 'GET'} ${path}`;
+    if (failure.name === 'TimeoutError')
+      throw new APIError('The request timed out with no reply.', 0, where);
+    if (failure.name === 'AbortError') throw failure;
+    throw new APIError(`The request could not be sent: ${failure.message}`, 0, where);
+  }
   if (!response.ok) {
     const raw = await response.text();
     let message = raw;
@@ -77,7 +97,11 @@ export async function request(path: string, init: RequestInit = {}) {
     } catch {
       /* The runtime can return plain text. */
     }
-    throw new APIError(message || `Request failed (${response.status}).`, response.status);
+    throw new APIError(
+      message || `Request failed (${response.status}).`,
+      response.status,
+      `${response.status} ${init.method || 'GET'} ${path}`,
+    );
   }
   return response;
 }
